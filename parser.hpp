@@ -10,13 +10,14 @@
 #include <boost/numeric/ublas/vector.hpp>
 #include <boost/numeric/ublas/io.hpp>
 
+#include "model.hpp"
 
 namespace FP{
   namespace ublas = boost::numeric::ublas;
 
-  template<typename Iterator>
   class Parser{
   public:
+    template<typename Iterator>
     bool parse(Iterator begin, Iterator end, std::vector<double> & res);
     
   private:
@@ -32,6 +33,9 @@ namespace FP{
 
     // Sequence information // Consider refactoring
     std::map<std::string, int> sequences;
+
+    //Pointer to model
+    ModelPtr model;
   };
 }
 

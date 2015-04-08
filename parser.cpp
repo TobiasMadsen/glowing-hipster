@@ -11,16 +11,22 @@ namespace FP{
       }
       else if( *it == ':'){
 	//Apply transition i.e. factor-to-node 
-	Iterator d_start = ++it;
-	while( isdigit(*++it) || *it == '.'){}
-	double length = stod(std::string(d_start, it));
+	std::stringstream buf;
+	while( isdigit(*++it) || *it == '.'){
+	  buf << *it;
+	}
+	double length = stod(buf.str());
 	transitionMessage(length);
       }
       else if( isalpha( *it ) ){
 	//Lookup sequence
-	Iterator s_start = it;
-	while( isalpha(*++it) ){}
-	std::string seq_name = std::string(s_start, it);
+	std::stringstream buf;
+	//	Iterator s_start = it;
+	buf << *it;
+	while( isalpha(*++it) ){
+	  buf << *it;
+	}
+	std::string seq_name = buf.str();
 	createMessage( seq_name );
       }
       else if( *it == ')' ){
@@ -99,7 +105,7 @@ namespace FP{
 
   //Instantiation
   template bool Parser::parse(char const*, char const*, std::vector<double> &);
-
+  template bool Parser::parse(std::istream_iterator<char>, std::istream_iterator<char>, std::vector<double> & );
 } //namespace FP
 
 

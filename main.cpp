@@ -1,6 +1,7 @@
 #include <iostream>
 #include <vector>
 #include <memory>
+#include <fstream>
 
 #include "parser.hpp"
 #include "model.hpp"
@@ -12,8 +13,9 @@ int main(int argc, char* argv[]){
   FP::Parser parser;
   parser.model = std::make_shared<FP::JukesCantor>();
 
-  //Setup newick string
-  char const *first = "(A:0.75,C:0.75);", *last = first + std::strlen(first);
+  // Read newick from file stream
+  std::fstream file("testcases/test1.nw");
+  std::istream_iterator<char> fileIterator(file);
 
   //Setup sequence information
   parser.sequences.insert( std::pair<std::string, int>("A", 1) );
@@ -22,7 +24,7 @@ int main(int argc, char* argv[]){
 
   // Test
   std::vector<double> summary;
-  parser.parse<char const*>(first, last, summary);
+  parser.parse<std::istream_iterator<char> >(fileIterator, std::istream_iterator<char>(), summary);
 
   std::cout << parser.mu.top() << std::endl;
   std::cout << parser.lambda.top() << std::endl;

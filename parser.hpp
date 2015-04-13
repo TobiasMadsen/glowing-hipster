@@ -12,6 +12,7 @@
 #include <boost/numeric/ublas/io.hpp>
 
 #include "model.hpp"
+#include "sequence.hpp"
 
 namespace FP{
   namespace ublas = boost::numeric::ublas;
@@ -33,8 +34,8 @@ namespace FP{
     std::stack< ublas::vector<double> > lambda;
 
     // Sequence information // Consider refactoring
-    std::map<std::string, int> sequences;
-
+    //    std::map<std::string, int> sequences;
+    SequencePtr sequences;
     //Pointer to model
     ModelPtr model;
   };

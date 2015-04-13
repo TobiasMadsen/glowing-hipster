@@ -66,20 +66,15 @@ namespace FP{
 
   // Put a terminal on the stack
   void Parser::createMessage(std::string const& s){
-    if( sequences.find( s ) != sequences.end() ){
-      // Message of first kind
-      std::cout << "Putting message on stack : " << s << std::endl;
-      ublas::vector<double> m(4,0);
-      m( sequences.find( s )->second ) = 1;
-      mu.push(m);
+    // Message of first kind
+    std::cout << "Putting message on stack : " << s << std::endl;
+    ublas::vector<double> m(4,0);
+    m( sequences->next(s) ) = 1;
+    mu.push(m);
 
-      // Message of second kind
-      ublas::vector<double> la(4,0);
-      lambda.push(la);
-    }
-    else{
-      std::cout << "Sequence information not found" << std::endl;
-    }
+    // Message of second kind
+    ublas::vector<double> la(4,0);
+    lambda.push(la);
   }
 
   // Use transition matrix to create factor-to-node message

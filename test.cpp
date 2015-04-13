@@ -12,6 +12,7 @@
 
 #include "model.hpp"
 #include "parser.hpp"
+#include "sequence.hpp"
 
 namespace ublas = boost::numeric::ublas;
 
@@ -29,6 +30,23 @@ BOOST_AUTO_TEST_CASE(JukesCantor_1){
   std::cout << matExp << std::endl;
 }
 
+BOOST_AUTO_TEST_CASE(SequenceMap_1){
+  std::shared_ptr<FP::SequenceMap> sm(new FP::SequenceMap());
+  sm->addSeq("A", 1);
+  sm->addSeq("B", 2);
+
+  BOOST_CHECK_EQUAL( sm->next("A"), 1);
+  BOOST_CHECK_EQUAL( sm->next("B"), 2);
+}
+
+BOOST_AUTO_TEST_CASE(SequenceStream_1){
+  std::shared_ptr<FP::SequenceStream> ss(new FP::SequenceStream("testcases/seq1.txt"));
+  BOOST_CHECK_EQUAL( ss->next("A"), 1);
+  BOOST_CHECK_EQUAL( ss->next("A"), 2);
+  BOOST_CHECK_EQUAL( ss->next("A"), 0);
+
+}
+
 BOOST_AUTO_TEST_CASE(Parser_JC_1){
   // Setup parser
   FP::Parser parser;
@@ -39,7 +57,9 @@ BOOST_AUTO_TEST_CASE(Parser_JC_1){
   std::istream_iterator<char> fileIterator(file);
 
   // Setup sequences
-  parser.sequences.insert( std::pair<std::string, int>("A", 1) );
+  std::shared_ptr<FP::SequenceMap> sm(new FP::SequenceMap());
+  sm->addSeq("A", 1);
+  parser.sequences = sm;
 
   // Parse
   std::vector<double> summary;
@@ -48,6 +68,7 @@ BOOST_AUTO_TEST_CASE(Parser_JC_1){
   // Test
   BOOST_CHECK_CLOSE( summary.at(0) , 2.25, 0.0001);
 }
+
 
 BOOST_AUTO_TEST_CASE(Parser_JC_2){
   // Setup parser
@@ -59,8 +80,10 @@ BOOST_AUTO_TEST_CASE(Parser_JC_2){
   std::istream_iterator<char> fileIterator(file);
 
   // Setup sequences
-  parser.sequences.insert( std::pair<std::string, int>("A", 1) );
-  parser.sequences.insert( std::pair<std::string, int>("B", 2) );
+  std::shared_ptr<FP::SequenceMap> sm(new FP::SequenceMap());
+  sm->addSeq("A", 1);
+  sm->addSeq("B", 2);
+  parser.sequences = sm;
 
   // Parse
   std::vector<double> summary;
@@ -85,9 +108,11 @@ BOOST_AUTO_TEST_CASE(Parser_JC_3){
   std::istream_iterator<char> fileIterator2(file2);
 
   // Setup sequences
-  parser.sequences.insert( std::pair<std::string, int>("A", 1) );
-  parser.sequences.insert( std::pair<std::string, int>("B", 2) );
-  parser.sequences.insert( std::pair<std::string, int>("C", 0) );
+  std::shared_ptr<FP::SequenceMap> sm(new FP::SequenceMap());
+  sm->addSeq("A", 1);
+  sm->addSeq("B", 2);
+  sm->addSeq("C", 0);
+  parser.sequences = sm;
 
   // Parse
   std::vector<double> summary1;
@@ -99,3 +124,4 @@ BOOST_AUTO_TEST_CASE(Parser_JC_3){
   // Test
   BOOST_CHECK_CLOSE( summary1.at(0) , summary2.at(0), 0.0001);
 }
+

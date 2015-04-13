@@ -41,6 +41,25 @@ namespace FP{
       }
     }
 
+
+    // Calculate summaries 
+    if( mu.size() == 1 && lambda.size() == 1){
+      std::cout << "Calculating summaries" << std::endl;
+
+      //Calculate summary statistics
+      double lik = sum(mu.top());
+      double summary = sum(lambda.top());
+      summary /= lik;
+      res.push_back(summary);
+    }
+    else{
+      std::cerr << "ERROR: parser.cpp::parse: stacks have incorrect number of messages" << std::endl;
+    }
+
+    // Clear stacks
+    while( ! mu.empty()) mu.pop();
+    while( ! lambda.empty()) lambda.pop();
+    
     std::cout << std::endl;
     return true;
   }

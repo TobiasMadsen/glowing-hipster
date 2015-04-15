@@ -25,7 +25,7 @@ namespace FP{
     std::map<std::string, int> sequences;
   };
 
-  class SequenceStream{
+  class SequenceStream : public Sequence{
     // Reads characters from filestream
     // Assuming correct order: That is the same order
     // as the sequences appears in the newick file
@@ -39,7 +39,7 @@ namespace FP{
     std::istream_iterator<char> fileIterator;
   };
 
-  class SequenceDummy{
+  class SequenceDummy : public Sequence{
     // Returns 0 regardless
     // Convenient for testing
   public:

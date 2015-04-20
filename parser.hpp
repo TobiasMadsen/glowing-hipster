@@ -29,14 +29,15 @@ namespace FP{
     void createMessage(std::string const& s);
 
     // Stacks for messages
-  public: //Only for Dev
-    std::stack< ublas::vector<double> > mu;
-    std::stack< ublas::vector<double> > lambda;
+    std::stack<double> scaling;
+    std::stack<ublas::vector<double> > mu;
+    std::stack<ublas::vector<double> > lambda;
 
-    // Sequence information // Consider refactoring
-    //    std::map<std::string, int> sequences;
+  public:
+    // Sequence information
     SequencePtr sequences;
-    //Pointer to model
+
+    // Pointer to model
     ModelPtr model;
   };
 }

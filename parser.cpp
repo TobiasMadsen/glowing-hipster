@@ -44,13 +44,7 @@ namespace FP{
 
     // Calculate summaries 
     if( mu.size() == 1 && lambda.size() == 1){
-      std::cout << "Calculating summaries" << std::endl;
-
-      //Calculate summary statistics
-      double lik = sum(mu.top());
-      double summary = sum(lambda.top());
-      summary /= lik;
-      res.push_back(summary);
+      res.push_back( sum(lambda.top()) );
     }
     else{
       std::cerr << "ERROR: parser.cpp::parse: stacks have incorrect number of messages" << std::endl;
@@ -60,61 +54,86 @@ namespace FP{
     while( ! mu.empty()) mu.pop();
     while( ! lambda.empty()) lambda.pop();
     
-    std::cout << std::endl;
     return true;
   }
 
   // Put a terminal on the stack
   void Parser::createMessage(std::string const& s){
-    // Message of first kind
-    std::cout << "Putting message on stack : " << s << std::endl;
-    ublas::vector<double> m(4,0);
-    m( sequences->next(s) ) = 1;
-    mu.push(m);
+    // Message of first kind + scaling
+    ublas::vector<double> mu_new(4,0);
+    mu_new( sequences->next(s) ) = 1;
+    mu.push( mu_new );
+    scaling.push( 1 );
 
     // Message of second kind
-    ublas::vector<double> la(4,0);
-    lambda.push(la);
+    ublas::vector<double> lambda_new(4,0);
+    lambda.push( lambda_new );
   }
 
   // Use transition matrix to create factor-to-node message
   // Takes top of stack and transforms it
   void Parser::transitionMessage(double const& d){
     if( ! mu.empty() ){
-      // Message of first kind
+      // Message of first kind + scaling
       ublas::matrix<double> transition = model->transitionMatrix(d);
-      ublas::vector<double> v = mu.top();
+      ublas::vector<double> mu_old = mu.top();
+      double scaling_old = scaling.top();
       mu.pop();
-      mu.push( prod( transition, v) );
+      scaling.pop();
+      
+      // Calculate new message and normalize
+      ublas::vector<double> mu_new = prod( transition, mu_old);
+      double scale_factor = 1/sum(mu_new);
+      double scaling_new = scaling_old + log(scale_factor);
+      mu_new = mu_new * scale_factor;
+      mu.push( mu_new );
+      scaling.push( scaling_new );
 
       // Messages of second kind
       ublas::matrix<double> expected = model->summaryStatistic(d);
-      ublas::vector<double> la = lambda.top();
+      ublas::vector<double> lambda_old = lambda.top();
       lambda.pop();
-      lambda.push( prod( element_prod( expected, transition), v) + prod( transition, la) );
+
+      // Calculate new message and normalize
+      ublas::vector<double> lambda_new = prod( element_prod( expected, transition), mu_old) + prod( transition, lambda_old);
+      lambda_new = lambda_new * scale_factor;
+      lambda.push( lambda_new );
     }
     else{
       //TODO Error message
     }
-    std::cout << "Transition matrix being applied" << std::endl;
   }
 
   // Take two in-messages and calculate out-message
   void Parser::mergeMessages(){
     //Message of first kind
-    std::cout << "Merging messages" << std::endl;
-    ublas::vector<double> mu1 = mu.top();
+    ublas::vector<double> mu1_old = mu.top();
+    double scaling_old_1 = scaling.top();
     mu.pop();
-    ublas::vector<double> mu2 = mu.top();
+    scaling.pop();
+    ublas::vector<double> mu2_old = mu.top();
+    double scaling_old_2 = scaling.top();
     mu.pop();
-    mu.push( element_prod(mu1, mu2) );
+    scaling.pop();
 
-    //Message of second kind
-    ublas::vector<double> la1 = lambda.top();
+    // Calculate new message and normalize
+    ublas::vector<double> mu_new = element_prod(mu1_old, mu2_old);
+    double scale_factor = 1/sum(mu_new);
+    double scaling_new = scaling_old_1 + scaling_old_2 + log(scale_factor);
+    mu_new = mu_new * scale_factor;
+    mu.push( mu_new );
+    scaling.push( scaling_new );
+
+    // Message of second kind
+    ublas::vector<double> lambda1_old = lambda.top();
     lambda.pop();
-    ublas::vector<double> la2 = lambda.top();
+    ublas::vector<double> lambda2_old = lambda.top();
     lambda.pop();
-    lambda.push( element_prod(mu1, la2) + element_prod(mu2, la1) );
+
+    // Calcuate new message and normalize
+    ublas::vector<double> lambda_new = element_prod(mu1_old, lambda2_old) + element_prod(mu2_old, lambda1_old);
+    lambda_new = lambda_new * scale_factor;
+    lambda.push( lambda_new );
   }
 
   //Instantiation
